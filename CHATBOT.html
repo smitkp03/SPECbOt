@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat Bot</title>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+        <style>
+
+            html{
+                scroll-behavior: smooth;
+                font-family: Helvetica, sans-serif, Arial;   
+            }
+
+            body{
+                margin: 0 auto;
+                background-color: #000000;
+            }
+
+                    .chat-bar-collapsible { 
+                        position: fixed;
+                        bottom: 2%;
+                        right: 20%;   /*original size is 50 px */ 
+                        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+                    }
+
+                    .collapsible {
+                        background-color: rgb(82, 151, 255);
+                        color: white;
+                        cursor: pointer;
+                        padding: 18px;
+                        width: 850px;       /*original size is 350px*/
+                        text-align: left;
+                        outline: none;
+                        font-size: 18px;
+                        border-radius: 10px 10px 0px 0px;
+                        border: 3px solid white;
+                        border-bottom: none;
+                        }
+                        
+                    .content {
+                        /* max-height: 0;     */
+                        overflow: hidden;
+                        transition: max-height 0.2s ease-out;
+                        background-color:#ffffff;
+                    }
+                        
+                    .full-chat-block { 
+                        width: 850px;   /*original size is 350px*/
+                        background: white;
+                        text-align: center; 
+                        overflow: auto;
+                        scrollbar-width:none; 
+                        height: 525px;; 
+                        transition: max-height 0.2s ease-out;
+                    }
+                        
+                    .outer-container { 
+                        min-height: 500px; 
+                        bottom: 0%; 
+                        position: relative; 
+                    }
+                        
+                    .chat-container { 
+                        max-height: 500px;
+                        width: 100%; 
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        scroll-behavior: smooth;
+                        hyphens: auto;
+                    }
+
+                    .chat-container::-webkit-scrollbar{
+                        display: none;
+                    }
+                        
+                    .chat-bar-input-block {
+                        display: flex;
+                        float: left;
+                        box-sizing: border-box; 
+                        justify-content: space-between; 
+                        width: 100%; 
+                        align-items: center;
+                        background-color: rgb(235, 235, 235);
+                        border-radius: 10px 10px 0px 0px; 
+                        padding: 10px 0px 10px 10px;
+                    }
+                        
+                    .chat-bar-icons {    
+                        display: flex;
+                        justify-content: space-evenly;
+                        box-sizing: border-box;
+                        width: 25%;
+                        float: right;
+                        font-size: 20px;
+                    }
+
+                    #chat-icon:hover { 
+                        opacity: .7;
+                    }
+                        
+                    /* Chat bubbles */
+                        
+                    #userInput {    
+                        width: 75%;
+                    }
+                        
+                    .input-box {
+                        float: left;
+                        border: none;
+                        box-sizing: border-box;
+                        width: 100%;
+                        border-radius: 10px;
+                        padding: 10px;
+                        font-size: 18px;
+                        color: #000;
+                        background-color: #f1f1f1;
+                        outline: none;
+                    }
+
+                    .userText {
+                        color: white;
+                        font-family: Helvetica;
+                        font-size: 18px;
+                        font-weight: normal;
+                        text-align: right;
+                        clear: both;
+                    }
+                        
+                    .userText span {    
+                        line-height: 1.5em;
+                        display: inline-block;
+                        background:#5ca6fa;
+                        padding: 10px;
+                        border-radius: 8px;
+                        border-bottom-right-radius: 2px;
+                        max-width: 80%;
+                        margin-right: 10px;
+                        animation: floatup .5s forwards
+                    }
+
+                    .botText {
+                        color:#000;
+                        font-family: Helvetica;
+                        font-weight: normal;
+                        font-size: 17px;
+                        text-align: left;
+                    }
+                        
+                    .botText span {    
+                        line-height: 1.5em;
+                        display: inline-block;
+                        background: #e0e0e0; 
+                        padding: 10px;
+                        border-radius: 8px;
+                        border-bottom-left-radius: 2px;
+                        max-width: 80%;
+                        margin-left: 10px;
+                        animation: floatup .5s forwards
+                    }
+
+                    @keyframes floatup{
+                        from{
+                            transform: translateY(14px);
+                            opacity: .0;
+                        }
+                        to {
+                            transform: translateY(0px);
+                            opacity: 1;
+                        }
+                    }
+
+                    @media screen and (max-width:600px){
+                        .full-chat-block {
+                            width:100%;
+                            border-radius: 0px;
+                        }
+                        .chat-bar-collapsible {
+                            position: fixed;
+                            bottom: 0;
+                            right: 0;
+                            width: 100%;
+
+                        }
+                        .collapsible {
+                            width: 100%;
+                            border: 0px;
+                            border-top: 3px solid white;
+                            border-radius: 0px;
+                        }
+                    }
+        </style>
+
+</head>
+<body>
+
+    <!-- Chat Bar Block-->
+
+    <div class="chat-bar-collapsible">
+        <button id="chat-button" type="button" class="collapsible">Welcome to SPECBOT !
+            <i id="chat-icon" style="color : #fff;" class="fa fa-fw fa-comments-o"></i>
+        </button>
+
+            <div class="content">
+                <div class="full-chat-block">
+                    <!--Message Container-->
+
+                    <div class="outer-container">
+                        <div class="chat-container">
+                            <!--Message-->
+                            <div id="chatbox">
+                                <h5 id="chat-timestamp"></h5>
+                                <p id="botStarterMessage" class="botText"><span>Loading....</span></p>
+                            </div>
+
+                            <!-- User input box-->
+                            <div class="chat-bar-input-block">
+                                <div id="userInput">
+                                    <input id="textInput" class="input-box" type="text" name="msg" placeholder="Tap 'Enter' to send message">
+                                    <p></p>
+                                </div>
+
+                                <div class="chat-bar-icons">
+                                    <i id="chat-icon" style="color : crimson;" class='fa fa-fw fa-heart' onclick="heartButton()"></i>
+                                    <i id="chat-icon" style="color : #333;" class='fa fa-fw fa-send' onclick="sendButton()"></i>
+                                </div>
+                            </div>
+
+                            <div id="chat-bar-bottom">
+                                <p></p>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+    </div>
+    
+</body>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+    <script>
+
+        
+            // Chats.js
+
+                // Colapsible
+                var coll = document.getElementsByClassName("collapsible")
+
+                for (let i = 0; i < coll.length; i++) {
+
+                    coll[i].addEventListener("click", function (){
+                        this.classList.toggle("active");
+
+                        var content = this.nextElementSibling;
+
+                        if (content.style.maxHeight){
+                            content.style.maxHeight = null;
+                        }else{
+                            content.style.maxHeight = contentscrollHeight + "px";
+                        }
+                    });
+
+                }
+
+                function getTime(){
+
+                    let today = new Date();
+                    hours = today.getHours();
+                    minutes = today.getMinutes();
+
+                    if (hours < 10){
+                        hours = "0" + hours // 05:19
+
+                    }
+
+                    if (minutes < 10){
+                        minutes = "0" + minutes // 05:19
+                        
+                    }
+
+                    let time = hours + ":" + minutes;
+                    return time;
+                }
+
+                function firstBotMessage() {
+                    
+                    let firstMessage = " Hello ! <br><br> Welcome to SpecBot ! <br><br>  Please Select The number given in bellow list according to your Query ! <br><br> 1. Student Inquiry  <br> 2. Seats Availiblity <br> 3. Fees <br> 4. Fees Structure <br> 5.Campus <br>6.Other Activities <br> 7.Other funds for enjoyments (like industrial visit  and cultural activities) <br> 8. Placements inquiry <br> 9. Other courses in our colleges <br> 10. Faculties <br> 11. Other social media connectivity";
+                    
+                    document.getElementById("botStarterMessage").innerHTML = '<p class="botText"><span>' + firstMessage + '</span></p>' ;
+
+                    let time = getTime();
+
+                    $("#chats-timestamp").append(time);
+                    document.getElementById("userInput").scrollIntoView(false);
+
+                }
+
+                firstBotMessage();
+
+                function getHardResponse(userText){
+                    let botResponse = getBotResponse(userText);
+                    let botHtml = '<p class= "botText"><span>' + botResponse + '</span></p>';
+
+                    $("#chatbox").append(botHtml);
+
+                    document.getElementById("chat-bar-bottom").scrollIntoView(true);
+
+                }
+
+                function getResponse(){
+                    let userText = $("#textInput").val();
+
+                    if (userText == "" ){
+                        userText = " ";     // when user press empty textbox and enter 
+                    }
+
+                    let userHtml = '<p class= "userText"><span>' + userText + '</span></p>';
+
+                    $("#textInput").val("");
+                    $("#chatbox").append(userHtml);
+                    document.getElementById("chat-bar-bottom").scrollIntoView(true);
+
+                    setTimeout( ()  => {
+                        getHardResponse(userText);
+                    }, 1000 )
+                }
+
+                function buttonSendText(sampleText) {
+
+                    let userHtml = '<p class= "userText"><span>' + sampleText + '</span></p>';
+
+                    $("#textInput").val("");
+                    $("#chatbox").append(userHtml);
+                    document.getElementById("chat-bar-bottom").scrollIntoView(true);
+                }
+
+                function sendButton(){
+
+                    getResponse();
+                }
+
+                function heartButton() {
+                    buttonSendText("Heart Clicked !")
+                }
+
+                // Press enter to send a message
+                $("#textInput").keypress(function(e) {
+                    if(e.which == 13 ) {
+                        getResponse();
+                    }
+                })
+
+
+                // response.js
+
+                function getBotResponse(input){
+
+                    if (input == "1"){
+                        return "1. Bachelor of Engineering ( B.E/ B.Tech ) <br>--> ( IT, Comp, Mechanical, Civil, Electrical )";
+                    } 
+
+                    else if ( input == "2" ){
+                        return "2. In all the streams of our Engineering there are total 60 seats <br>0/60 is occupied";
+                    } 
+
+                    else if ( input == "3" ){
+                        return "3. The Fees for all Streams Of B.E is 60,000/- <br> 30,000 / semister";
+                    }
+
+                    else if ( input == "4" ){
+                        return "4. In Fee structure <br>You can Pay the fees (online/offline) <br> ★ ₹ 5000/ Month x 6 times = 30,000 / Sem <br>★ ₹ 15,000 / 3Months x 2times = 30,000 / Sem <br>★ ₹ 30,000 / 6 months";
+                    }
+
+                    else if ( input == "5" ){
+                        return "5. CAMPUS <br>★ There many other Colleges like<br> -->Pharmacy<br>-->BBA/MBA<br>-->BCA/MCA<br>-->B.sc/M.sc<br>And many other";
+                    }
+
+                    else if ( input == "6" ){
+                        return "6. Other activity happened in our college like<br>NSS Camp<br>Industrial Visit<br>Tech Fest<br>Annual DayCelebration<br>Sports Day Celebration<br>Culture Days Celebration<br>Ganesh Chaturthi<br>Navratri celebration<br>Independence Day Celebration<br>Women's Day Celebration<br>Republic Day Celebration<br>Janmashtmi Celebration <br>And many other small/big events and functions";
+                    }
+
+                    else if ( input == "7" ){
+                        return "7. There can be extra cost for the events which held during season <br>It can't be more then 5000*/ year ";
+                    }
+
+                    else if ( input == "8" ){
+                        return "8. As Our students got placements at byjus also having more then 1.5 lakkh package.<br>Many other Companies Haiers our students at good package";
+                    }
+
+                    else if ( input == "9" ){
+                        return " 9. Other program parallel to the 4 Year Engineering is SAP also that held for 100 hrs* for the students who have interest in ML / AI like technology's";
+                    }
+
+                    else if ( input == "10" ){
+                        return "10. In our Faculty background<br>Principal: Vishwajit Sir <br>Acadamic head & Administrator Head : Jay Sir & Nikul Sir.<br>Hod : Kaushal Sir (IT)<br> Jigar Sir (Comp)<br><br>Staff members: <br>Pooja mam<br>Jigisha mam<br>Janki mam<br>Poonam mam<br>Janvi mam<br>Toral mam<br>Amit Sir <br><br>Which have experience of more then 1 yrs in professional life";
+                    }
+
+                    else if ( input == "11" ){
+                        return " 11. Annual Day Celebration glimpse : https://www.instagram.com/reel/CpXpq4pMwst/?igshid=MDJmNzVkMjY=" ;
+                    }
+
+                    else if ( input == "ok" ){
+                        return " Thank You <br> Press 0 for main menu ";
+                    }
+
+                    else if ( input == "okk" ){
+                        return " Thank You <br> Press 0 for main menu ";
+                    }
+
+                    else if ( input == "okay" ){
+                        return " Thank You <br> Press 0 for main menu ";
+                    }
+
+                    else if ( input == "thank you" ){
+                        return " Welcome <br> Press 0 for main menu ";
+                    }
+
+                    else if ( input == "bye" ){
+                        return " Good Bye";
+                    }
+
+                    else if ( input == "0" ){
+                        return "Please Select The number given in bellow list according to your Query ! <br><br> 1. Student Inquiry  <br> 2. Seats Availiblity <br> 3. Fees <br> 4. Fees Structure <br> 5.Campus <br>6.Other Activities <br> 7.Other funds for enjoyments (like industrial visit  and cultural activities) <br> 8. Placements inquiry <br> 9. Other courses in our colleges <br> 10. Faculties <br> 11. Other social media connectivity";
+                    }
+
+
+                    else if (input == "(Hello)" || "(hii)" || "(hey)" || "(hello)" || "(hi)" || "(hiii)" || "(please help)" || "(can you help me?)" || "(can you help me ?)" || "(can you help me)" || "(hello specbot)"){
+                         return "Hello ! <br><br> Welcome to SpecBot ! <br><br>  Please Select The number given in bellow list according to your Query ! <br><br> 1. Student Inquiry  <br> 2. Seats Availiblity <br> 3. Fees <br> 4. Fees Structure <br> 5.Campus <br>6.Other Activities <br> 7.Other funds for enjoyments (like industrial visit  and cultural activities) <br> 8. Placements inquiry <br> 9. Other courses in our colleges <br> 10. Faculties <br> 11. Other social media connectivity";
+                    } 
+
+                    else {
+                        return "Please Select The number given in bellow list according to your Query ! <br><br> 1. Student Inquiry  <br> 2. Seats Availiblity <br> 3. Fees <br> 4. Fees Structure <br> 5.Campus <br>6.Other Activities <br> 7.Other funds for enjoyments (like industrial visit  and cultural activities) <br> 8. Placements inquiry <br> 9. Other courses in our colleges <br> 10. Faculties <br> 11. Other social media connectivity";
+                    }
+                    }
+
+    </script>
+
+</html>
